@@ -3,6 +3,8 @@ import { Scene } from 'phaser';
 export class Preloader extends Scene {
 
   private platforms: Phaser.Physics.Arcade.StaticGroup | null;
+  cursors: Phaser.Types.Input.Keyboard.CursorKeys;
+  player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
 
   constructor() {
     super('Preloader');
@@ -34,10 +36,10 @@ export class Preloader extends Scene {
     this.platforms.create(50, 250, 'ground');
     this.platforms.create(750, 220, 'ground');
 
-    const player = this.physics.add.sprite(100, 450, 'dude');
-
-    player.setBounce(0.2);
-    player.setCollideWorldBounds(true);
+    this.player = this.physics.add.sprite(100, 450, 'dude');
+    this.cursors = this.input.keyboard!.createCursorKeys();
+    this.player.setBounce(0.2);
+    this.player.setCollideWorldBounds(true);
     this.anims.create({
       key: 'left',
       frames: this.anims.generateFrameNumbers('dude', { start: 0, end: 3 }),
@@ -57,5 +59,30 @@ export class Preloader extends Scene {
       frameRate: 10,
       repeat: -1
     });
+
+    this.physics.add.collider(this.player, this.platforms);
+  }
+
+  update(): void {
+
+    if (this.cursors.left.isDown) {
+      this.player.setVelocityX(-160);
+
+      this.player.anims.play('left', true);
+    }
+    else if (this.cursors.right.isDown) {
+      this.player.setVelocityX(160);
+
+      this.player.anims.play('right', true);
+    }
+    else {
+      this.player.setVelocityX(0);
+
+      this.player.anims.play('turn');
+    }
+
+    if (this.cursors.up.isDown && this.player.body.touching.down) {
+      this.player.setVelocityY(-330);
+    }
   }
 }

@@ -5,10 +5,14 @@ export class Preloader extends Scene {
   private platforms: Phaser.Physics.Arcade.StaticGroup | null;
   cursors: Phaser.Types.Input.Keyboard.CursorKeys;
   player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
+  stars: Phaser.Physics.Arcade.Group; // Dynamic sprite objects
+  scoreText: Phaser.GameObjects.Text;
+  score: number = 0;
 
   constructor() {
     super('Preloader');
     this.platforms = null;
+    this.score = 0;
   }
 
   init() {
@@ -31,10 +35,22 @@ export class Preloader extends Scene {
     this.platforms = this.physics.add.staticGroup();
 
     this.platforms.create(400, 568, 'ground').setScale(2).refreshBody();
-
     this.platforms.create(600, 400, 'ground');
     this.platforms.create(50, 250, 'ground');
     this.platforms.create(750, 220, 'ground');
+    this.scoreText = this.add.text(16, 16, 'score: 0', { fontSize: '32px' });
+
+    this.stars = this.physics.add.group({
+      key: 'star',
+      repeat: 11,
+      setXY: { x: 12, y: 0, stepX: 70 }
+    });
+
+
+    this.stars.children.iterate((child) => {
+      (child as Phaser.Physics.Arcade.Sprite).setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
+      return true;
+    });
 
     this.player = this.physics.add.sprite(100, 450, 'dude');
     this.cursors = this.input.keyboard!.createCursorKeys();
@@ -61,6 +77,12 @@ export class Preloader extends Scene {
     });
 
     this.physics.add.collider(this.player, this.platforms);
+    this.physics.add.collider(this.stars, this.platforms);
+    this.physics.add.overlap(this.player, this.stars, (_player, star) => {
+      (star as Phaser.Physics.Arcade.Sprite).disableBody(true, true);
+      this.score += 10;
+      this.scoreText.setText('Score: ' + this.score);
+    });
   }
 
   update(): void {

@@ -6,6 +6,7 @@ export class Preloader extends Scene {
   cursors: Phaser.Types.Input.Keyboard.CursorKeys;
   player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
   stars: Phaser.Physics.Arcade.Group; // Dynamic sprite objects
+  bombs: Phaser.Physics.Arcade.Group; // Dynamic sprite objects
   scoreText: Phaser.GameObjects.Text;
   score: number = 0;
 
@@ -46,6 +47,8 @@ export class Preloader extends Scene {
       setXY: { x: 12, y: 0, stepX: 70 }
     });
 
+    this.bombs = this.physics.add.group();
+
 
     this.stars.children.iterate((child) => {
       (child as Phaser.Physics.Arcade.Sprite).setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
@@ -78,11 +81,35 @@ export class Preloader extends Scene {
 
     this.physics.add.collider(this.player, this.platforms);
     this.physics.add.collider(this.stars, this.platforms);
-    this.physics.add.overlap(this.player, this.stars, (_player, star) => {
+    this.physics.add.collider(this.bombs, this.platforms);
+
+    this.physics.add.overlap(this.player, this.stars, (playerObject, star) => {
+      const player = playerObject as Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
       (star as Phaser.Physics.Arcade.Sprite).disableBody(true, true);
       this.score += 10;
       this.scoreText.setText('Score: ' + this.score);
+
+      if (this.stars.countActive(true) === 0) {
+        this.stars.children.iterate(child => {
+          const star = child as Phaser.Physics.Arcade.Sprite;
+          star.enableBody(true, star.x, 0, true, true);
+          return true;
+        });
+
+        var x = (player.x < 400) ? Phaser.Math.Between(400, 800) : Phaser.Math.Between(0, 400);
+
+        var bomb = this.bombs.create(x, 16, 'bomb');
+        bomb.setBounce(1);
+        bomb.setCollideWorldBounds(true);
+        bomb.setVelocity(Phaser.Math.Between(-200, 200), 20);
+      }
     });
+
+    this.physics.add.collider(this.player, this.bombs, (player) => {
+      this.physics.pause();
+      (player as Phaser.Types.Physics.Arcade.SpriteWithDynamicBody).setTint(0xff0000);
+      (player as Phaser.Types.Physics.Arcade.SpriteWithDynamicBody).anims.play('turn');
+    })
   }
 
   update(): void {

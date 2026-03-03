@@ -1,31 +1,35 @@
-import { Boot } from './scenes/Boot';
-import { GameOver } from './scenes/GameOver';
-import { Game as MainGame } from './scenes/Game';
-import { MainMenu } from './scenes/MainMenu';
 import { AUTO, Game } from 'phaser';
-import { Preloader } from './scenes/Preloader';
+import { Preload } from './scenes/preload.ts';
+import { Game as GameScene } from './scenes/game.ts';
+import { SCENE_KEYS } from './common/scenes.keys';
 
-//  Find out more information about the Game Config at:
-//  https://docs.phaser.io/api-documentation/typedef/types-core#gameconfig
 const config: Phaser.Types.Core.GameConfig = {
-    type: AUTO,
-    width: 1024,
-    height: 768,
+  type: AUTO,
+  pixelArt: true,
+  roundPixels: true,
+  scale: {
     parent: 'game-container',
-    backgroundColor: '#028af8',
-    scene: [
-        Boot,
-        Preloader,
-        MainMenu,
-        MainGame,
-        GameOver
-    ]
+    width: 640,
+    height: 450,
+    autoCenter: Phaser.Scale.CENTER_BOTH,
+    mode: Phaser.Scale.FIT
+  },
+  backgroundColor: '#000000',
+  physics: {
+    default: 'arcade',
+    arcade: {
+      gravity: { y: 0, x: 0 },
+      debug: true
+    }
+  }
 };
 
 const StartGame = (parent: string) => {
-
-    return new Game({ ...config, parent });
-
+  const game = new Game({ ...config, parent });
+  game.scene.add(SCENE_KEYS.PRELOAD_SCENE, Preload);
+  game.scene.add(SCENE_KEYS.GAME_SCENE, GameScene);
+  game.scene.start(SCENE_KEYS.PRELOAD_SCENE);
+  return game;
 }
 
 export default StartGame;

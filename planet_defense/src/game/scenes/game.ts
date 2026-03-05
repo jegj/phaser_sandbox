@@ -1,4 +1,4 @@
-import { Scene } from 'phaser';
+import { GameObjects, Scene } from 'phaser';
 import { SCENE_KEYS } from '../common/scenes.keys';
 import { ASSET_KEYS } from '../common/assets';
 
@@ -7,6 +7,8 @@ export class Game extends Scene {
   private player: Phaser.GameObjects.Image;
   private playerAngleInRadians: number = 0;
   private cursorKeys: Phaser.Types.Input.Keyboard.CursorKeys;
+  private bulletGroup: Phaser.GameObjects.Group;
+  private lastBulletTime: number = 0;
 
   constructor() {
     super(
@@ -25,10 +27,11 @@ export class Game extends Scene {
     this.playerAngleInRadians = 0;
     this.updatePLayerPosition();
 
+    this.bulletGroup = this.physics.add.group([]);
     this.cursorKeys = this.input.keyboard!.createCursorKeys();
   }
 
-  update() {
+  update(time: number) {
     if (this.cursorKeys.left.isDown) {
       this.playerAngleInRadians -= 0.06;
     } else if (this.cursorKeys.right.isDown) {
@@ -36,6 +39,18 @@ export class Game extends Scene {
     }
 
     this.updatePLayerPosition();
+
+    if (Phaser.Input.Keyboard.JustDown(this.cursorKeys.space) && time > this.lastBulletTime + 200) {
+      this.fireBullet();
+      this.lastBulletTime = time;
+    }
+
+    this.bulletGroup.getChildren().forEach((bullet) => {
+      const bulletSprite = bullet as Phaser.Physics.Arcade.Image;
+      if (bulletSprite.active && (bulletSprite.x < 0 || bulletSprite.x > this.scale.width || bulletSprite.y < 0 || bulletSprite.y > this.scale.height)) {
+        bulletSprite.setActive(false).setVisible(false);
+      }
+    });
   }
 
   private updatePLayerPosition() {
@@ -43,5 +58,16 @@ export class Game extends Scene {
     const y = this.scale.height / 2 + (this.planet.displayHeight / 2) * Math.sin(this.playerAngleInRadians);
     this.player.setPosition(x, y);
     this.player.rotation = this.playerAngleInRadians + Math.PI / 2;
+  }
+
+  private fireBullet() {
+    const x = this.player.x;
+    const y = this.player.y;
+    const velocity = this.physics.velocityFromRotation(this.playerAngleInRadians, 400);
+    const bullet = this.bulletGroup.getFirstDead(true, x, y, ASSET_KEYS.BULLET, 0, true);
+    bullet.setActive(true).setVisible(true).setScale(1.5).play(ASSET_KEYS.BULLET).enableBody();
+    bullet.setVelocity(velocity.x, velocity.y);
+    bullet.setRotation(this.player.rotation);
+    console.log('fireBUllet: number of bullet', this.bulletGroup.getLength());
   }
 }

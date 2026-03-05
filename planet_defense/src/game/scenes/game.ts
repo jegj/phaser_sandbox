@@ -2,6 +2,11 @@ import { GameObjects, Scene } from 'phaser';
 import { SCENE_KEYS } from '../common/scenes.keys';
 import { ASSET_KEYS } from '../common/assets';
 
+
+const DATA_KEYS = {
+  ROTATION_SPEED: 'ROTATION_SPEED',
+}
+
 export class Game extends Scene {
   private planet: Phaser.GameObjects.Sprite;
   private player: Phaser.GameObjects.Image;
@@ -9,6 +14,7 @@ export class Game extends Scene {
   private cursorKeys: Phaser.Types.Input.Keyboard.CursorKeys;
   private bulletGroup: Phaser.GameObjects.Group;
   private lastBulletTime: number = 0;
+  private enemyGroup: Phaser.GameObjects.Group;
 
   constructor() {
     super(
@@ -28,7 +34,14 @@ export class Game extends Scene {
     this.updatePLayerPosition();
 
     this.bulletGroup = this.physics.add.group([]);
+    this.enemyGroup = this.physics.add.group([]);
     this.cursorKeys = this.input.keyboard!.createCursorKeys();
+    this.time.addEvent({
+      delay: 1250,
+      callback: this.spawnEnemy,
+      callbackScope: this,
+      loop: true
+    });
   }
 
   update(time: number) {
@@ -51,6 +64,14 @@ export class Game extends Scene {
         bulletSprite.setActive(false).setVisible(false);
       }
     });
+    this.enemyGroup.getChildren().forEach((enemy) => {
+      const enemySprite = enemy as Phaser.Physics.Arcade.Image;
+      if (enemySprite.active && (enemySprite.x < 0 || enemySprite.x > this.scale.width || enemySprite.y < 0 || enemySprite.y > this.scale.height)) {
+        enemySprite.setActive(false).setVisible(false);
+        return;
+      }
+      enemySprite.rotation += enemySprite.getData(DATA_KEYS.ROTATION_SPEED);
+    });
   }
 
   private updatePLayerPosition() {
@@ -69,5 +90,25 @@ export class Game extends Scene {
     bullet.setVelocity(velocity.x, velocity.y);
     bullet.setRotation(this.player.rotation);
     console.log('fireBUllet: number of bullet', this.bulletGroup.getLength());
+  }
+
+  spawnEnemy() {
+    let x, y;
+    const edge = Phaser.Math.Between(0, 3);
+    if (edge === 0) {
+      x = 0;
+      y = Phaser.Math.Between(0, this.scale.height);
+    } else if (edge === 1) {
+      x = this.scale.width;
+      y = Phaser.Math.Between(0, this.scale.height);
+    } else {
+      x = Phaser.Math.Between(0, this.scale.width);
+      y = 0;
+    }
+    const enemy = this.enemyGroup.getFirstDead(true, x, y, ASSET_KEYS.ASTEROID, 0, true);
+    enemy.setActive(true).setVisible(true).enableBody().setScale(Phaser.Math.FloatBetween(0.75, 1.25)).setData(DATA_KEYS.ROTATION_SPEED, Phaser.Math.FloatBetween(-0.05, 0.05));
+    enemy.body.setSize(enemy.displayWidth * 0.3, enemy.displayHeight * 0.3);
+    console.log('spawnEnemy: number of enemy', this.enemyGroup.getLength());
+    this.physics.moveTo(enemy, this.planet.x, this.planet.y, 50);
   }
 }

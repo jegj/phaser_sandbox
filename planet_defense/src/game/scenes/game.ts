@@ -15,9 +15,11 @@ export class Game extends Scene {
   private bulletGroup: Phaser.GameObjects.Group;
   private lastBulletTime: number = 0;
   private enemyGroup: Phaser.GameObjects.Group;
+  private destroyedEnemyGroup: Phaser.GameObjects.Group;
   private enemySpeed: number;
   private spawnDelay: number;
   private spawnTimer: Phaser.Time.TimerEvent;
+  private score: number = 0;
 
   constructor() {
     super(
@@ -38,7 +40,7 @@ export class Game extends Scene {
 
     this.bulletGroup = this.physics.add.group([]);
     this.enemyGroup = this.physics.add.group([]);
-    this.cursorKeys = this.input.keyboard!.createCursorKeys();
+    this.destroyedEnemyGroup = this.add.group([]);
     this.spawnDelay = 1250;
     this.enemySpeed = 50;
     this.spawnTimer = this.time.addEvent({
@@ -53,6 +55,9 @@ export class Game extends Scene {
       callbackScope: this,
       loop: true
     });
+    this.physics.add.overlap(this.bulletGroup, this.enemyGroup, this.handleBulletEnemyCollision as Phaser.Types.Physics.Arcade.ArcadePhysicsCallback, undefined, this);
+
+    this.cursorKeys = this.input.keyboard!.createCursorKeys();
   }
 
   update(time: number) {
@@ -139,5 +144,25 @@ export class Game extends Scene {
       this.enemySpeed += 10;
       console.log('increaseDifficulty: enemySpeed', this.enemySpeed);
     }
+  }
+
+  private handleBulletEnemyCollision(bullet: Phaser.GameObjects.GameObject, enemy: Phaser.GameObjects.GameObject) {
+    const bulletSprite = bullet as Phaser.Physics.Arcade.Image;
+    const enemySprite = enemy as Phaser.Physics.Arcade.Image;
+    bulletSprite.disableBody();
+    bulletSprite.setActive(false).setVisible(false);
+    enemySprite.disableBody();
+    enemySprite.setActive(false).setVisible(false);
+    this.score += 1;
+    console.log('Score:', this.score);
+    this.spawnDestroyedEnemy(enemySprite.x, enemySprite.y);
+  }
+
+  private spawnDestroyedEnemy(x: number, y: number) {
+    const explosion = this.destroyedEnemyGroup.getFirstDead(true, x, y, ASSET_KEYS.ASTEROID_EXPLODE, 0, true) as Phaser.GameObjects.Sprite;
+    explosion.setActive(true).setVisible(true).play(ASSET_KEYS.ASTEROID_EXPLODE);
+    explosion.once(Phaser.Animations.Events.ANIMATION_COMPLETE, () => {
+      explosion.setActive(false).setVisible(false);
+    });
   }
 }

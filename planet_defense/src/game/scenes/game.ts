@@ -15,6 +15,9 @@ export class Game extends Scene {
   private bulletGroup: Phaser.GameObjects.Group;
   private lastBulletTime: number = 0;
   private enemyGroup: Phaser.GameObjects.Group;
+  private enemySpeed: number;
+  private spawnDelay: number;
+  private spawnTimer: Phaser.Time.TimerEvent;
 
   constructor() {
     super(
@@ -36,9 +39,17 @@ export class Game extends Scene {
     this.bulletGroup = this.physics.add.group([]);
     this.enemyGroup = this.physics.add.group([]);
     this.cursorKeys = this.input.keyboard!.createCursorKeys();
-    this.time.addEvent({
-      delay: 1250,
+    this.spawnDelay = 1250;
+    this.enemySpeed = 50;
+    this.spawnTimer = this.time.addEvent({
+      delay: this.spawnDelay,
       callback: this.spawnEnemy,
+      callbackScope: this,
+      loop: true
+    });
+    this.time.addEvent({
+      delay: 10000,
+      callback: this.increaseDifficulty,
       callbackScope: this,
       loop: true
     });
@@ -109,6 +120,24 @@ export class Game extends Scene {
     enemy.setActive(true).setVisible(true).enableBody().setScale(Phaser.Math.FloatBetween(0.75, 1.25)).setData(DATA_KEYS.ROTATION_SPEED, Phaser.Math.FloatBetween(-0.05, 0.05));
     enemy.body.setSize(enemy.displayWidth * 0.3, enemy.displayHeight * 0.3);
     console.log('spawnEnemy: number of enemy', this.enemyGroup.getLength());
-    this.physics.moveTo(enemy, this.planet.x, this.planet.y, 50);
+    this.physics.moveTo(enemy, this.planet.x, this.planet.y, this.enemySpeed);
+  }
+
+  increaseDifficulty() {
+    if (this.spawnDelay > 500) {
+      this.spawnDelay -= 50;
+      console.log('increaseDifficulty: spawnDelay', this.spawnDelay);
+      this.spawnTimer.destroy();
+      this.spawnTimer = this.time.addEvent({
+        delay: this.spawnDelay,
+        callback: this.spawnEnemy,
+        callbackScope: this,
+        loop: true
+      });
+    }
+    if (this.enemySpeed < 200) {
+      this.enemySpeed += 10;
+      console.log('increaseDifficulty: enemySpeed', this.enemySpeed);
+    }
   }
 }

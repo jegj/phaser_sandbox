@@ -2,6 +2,7 @@ import { AUTO, Game } from 'phaser';
 import { Preload } from './scenes/preload.ts';
 import { Game as GameScene } from './scenes/game.ts';
 import { SCENE_KEYS } from './common/scenes.keys';
+import { GameOverScene } from './scenes/game-over.ts';
 
 const config: Phaser.Types.Core.GameConfig = {
   type: AUTO,
@@ -28,6 +29,7 @@ const StartGame = (parent: string) => {
   const game = new Game({ ...config, parent });
   game.scene.add(SCENE_KEYS.PRELOAD_SCENE, Preload);
   game.scene.add(SCENE_KEYS.GAME_SCENE, GameScene);
+  game.scene.add(SCENE_KEYS.GAME_OVER_SCENE, GameOverScene);
   game.scene.start(SCENE_KEYS.PRELOAD_SCENE);
   return game;
 }

@@ -1,4 +1,4 @@
-import { GameObjects, Scene } from 'phaser';
+import { Scene } from 'phaser';
 import { SCENE_KEYS } from '../common/scenes.keys';
 import { ASSET_KEYS } from '../common/assets';
 
@@ -8,7 +8,7 @@ const DATA_KEYS = {
 }
 
 export class Game extends Scene {
-  private planet: Phaser.GameObjects.Sprite;
+  private planet: Phaser.Physics.Arcade.Image;
   private player: Phaser.GameObjects.Image;
   private playerAngleInRadians: number = 0;
   private cursorKeys: Phaser.Types.Input.Keyboard.CursorKeys;
@@ -20,6 +20,8 @@ export class Game extends Scene {
   private spawnDelay: number;
   private spawnTimer: Phaser.Time.TimerEvent;
   private score: number = 0;
+  private lives: number = 3;
+  private lockInput: boolean = false;
 
   constructor() {
     super(
@@ -33,7 +35,8 @@ export class Game extends Scene {
     this.add.sprite(0, 0, ASSET_KEYS.BACKGROUND_1).setOrigin(0).setScale(1, 1.25).play(ASSET_KEYS.BACKGROUND_1).setAlpha(0.5);
     this.add.sprite(0, 0, ASSET_KEYS.BACKGROUND_2).setOrigin(0).setScale(1, 1.25).play(ASSET_KEYS.BACKGROUND_2).setAlpha(0.5);
     this.add.sprite(0, 0, ASSET_KEYS.BACKGROUND_3).setOrigin(0).setScale(1, 1.25).play(ASSET_KEYS.BACKGROUND_3).setAlpha(0.5);
-    this.planet = this.add.sprite(this.scale.width / 2, this.scale.height / 2, ASSET_KEYS.PLANET).setScale(1.5).play(ASSET_KEYS.PLANET);
+    this.planet = this.physics.add.sprite(this.scale.width / 2, this.scale.height / 2, ASSET_KEYS.PLANET).setScale(1.5).play(ASSET_KEYS.PLANET);
+    this.planet.body!.setCircle(30, 18, 18);
     this.player = this.add.image(0, 0, ASSET_KEYS.SHIP);
     this.playerAngleInRadians = 0;
     this.updatePLayerPosition();
@@ -55,12 +58,18 @@ export class Game extends Scene {
       callbackScope: this,
       loop: true
     });
+    this.lives = 3;
+    this.lockInput = false;
     this.physics.add.overlap(this.bulletGroup, this.enemyGroup, this.handleBulletEnemyCollision as Phaser.Types.Physics.Arcade.ArcadePhysicsCallback, undefined, this);
-
+    this.physics.add.overlap(this.planet, this.enemyGroup, this.handlePlanetEnemyCollision as Phaser.Types.Physics.Arcade.ArcadePhysicsCallback, undefined, this);
     this.cursorKeys = this.input.keyboard!.createCursorKeys();
   }
 
   update(time: number) {
+    if (this.lockInput) {
+      return
+    }
+
     if (this.cursorKeys.left.isDown) {
       this.playerAngleInRadians -= 0.06;
     } else if (this.cursorKeys.right.isDown) {
@@ -164,5 +173,42 @@ export class Game extends Scene {
     explosion.once(Phaser.Animations.Events.ANIMATION_COMPLETE, () => {
       explosion.setActive(false).setVisible(false);
     });
+  }
+
+  private handlePlanetEnemyCollision(planet: Phaser.GameObjects.GameObject, enemy: Phaser.GameObjects.GameObject) {
+    const enemySprite = enemy as Phaser.Physics.Arcade.Image;
+    enemySprite.disableBody();
+    enemySprite.setActive(false).setVisible(false);
+    this.spawnDestroyedEnemy(enemySprite.x, enemySprite.y);
+    this.damagePlanet();
+  }
+
+
+  private damagePlanet() {
+    if (this.lives <= 0) {
+      return
+    }
+    this.lives -= 1;
+
+    this.cameras.main.shake(150, 0.02)
+    this.tweens.add({
+      targets: this.planet,
+      scaleX: 1.1,
+      scaleY: 0.9,
+      duration: 100,
+      ease: Phaser.Math.Easing.Sine.InOut,
+      yoyo: true,
+    });
+
+    if (this.lives <= 0) {
+      this.lockInput = true;
+      this.player.setVisible(false);
+      this.planet.disableBody();
+      this.planet.setActive(false).setVisible(false);
+      this.spawnDestroyedEnemy(this.planet.x, this.planet.y);
+      this.scene.start(SCENE_KEYS.GAME_OVER_SCENE, {
+        score: this.score
+      });
+    }
   }
 }

@@ -22,6 +22,7 @@ export class Game extends Scene {
   private score: number = 0;
   private lives: number = 3;
   private lockInput: boolean = false;
+  private scoreText: Phaser.GameObjects.Text;
 
   constructor() {
     super(
@@ -59,6 +60,9 @@ export class Game extends Scene {
       loop: true
     });
     this.lives = 3;
+    this.score = 0;
+    const scoreTextPrefix = this.add.text(10, 10, "Score:", { fontSize: '16px' }).setDepth(2);
+    this.scoreText = this.add.text(scoreTextPrefix.x + scoreTextPrefix.displayWidth, scoreTextPrefix.y, this.score.toString(), { fontSize: '16px' }).setDepth(2);
     this.lockInput = false;
     this.physics.add.overlap(this.bulletGroup, this.enemyGroup, this.handleBulletEnemyCollision as Phaser.Types.Physics.Arcade.ArcadePhysicsCallback, undefined, this);
     this.physics.add.overlap(this.planet, this.enemyGroup, this.handlePlanetEnemyCollision as Phaser.Types.Physics.Arcade.ArcadePhysicsCallback, undefined, this);
@@ -163,7 +167,7 @@ export class Game extends Scene {
     enemySprite.disableBody();
     enemySprite.setActive(false).setVisible(false);
     this.score += 1;
-    console.log('Score:', this.score);
+    this.scoreText.setText(this.score.toString(10));
     this.spawnDestroyedEnemy(enemySprite.x, enemySprite.y);
   }
 

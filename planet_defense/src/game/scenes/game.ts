@@ -23,6 +23,7 @@ export class Game extends Scene {
   private lives: number = 3;
   private lockInput: boolean = false;
   private scoreText: Phaser.GameObjects.Text;
+  private planetHealthContainer: Phaser.GameObjects.Container;
 
   constructor() {
     super(
@@ -59,6 +60,11 @@ export class Game extends Scene {
       callbackScope: this,
       loop: true
     });
+    this.planetHealthContainer = this.add.container(this.scale.width / 2, this.planet.y + 50, [
+      this.add.sprite(-18, 0, ASSET_KEYS.HEART).play(ASSET_KEYS.HEART),
+      this.add.sprite(0, 0, ASSET_KEYS.HEART).play(ASSET_KEYS.HEART),
+      this.add.sprite(18, 0, ASSET_KEYS.HEART).play(ASSET_KEYS.HEART)
+    ]);
     this.lives = 3;
     this.score = 0;
     const scoreTextPrefix = this.add.text(10, 10, "Score:", { fontSize: '16px' }).setDepth(2);
@@ -193,6 +199,7 @@ export class Game extends Scene {
       return
     }
     this.lives -= 1;
+    this.planetHealthContainer.getAt(this.lives).destroy();
 
     this.cameras.main.shake(150, 0.02)
     this.tweens.add({

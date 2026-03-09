@@ -26,7 +26,12 @@ export class GameOverScene extends Scene {
     this.add.text(this.scale.width / 2, this.scale.height / 2 + 150, 'Click to Restart', { fontSize: '16px', color: '#FFFFFF' }).setOrigin(0.5);
 
     this.input.once(Phaser.Input.Events.POINTER_DOWN, () => {
-      this.scene.start(SCENE_KEYS.GAME_SCENE);
+      this.cameras.main.fadeOut(500,);
+      this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
+        this.scene.start(SCENE_KEYS.GAME_SCENE);
+      });
     });
+
+    this.cameras.main.fadeIn(500);
   }
 }

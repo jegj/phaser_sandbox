@@ -73,6 +73,7 @@ export class Game extends Scene {
     this.physics.add.overlap(this.bulletGroup, this.enemyGroup, this.handleBulletEnemyCollision as Phaser.Types.Physics.Arcade.ArcadePhysicsCallback, undefined, this);
     this.physics.add.overlap(this.planet, this.enemyGroup, this.handlePlanetEnemyCollision as Phaser.Types.Physics.Arcade.ArcadePhysicsCallback, undefined, this);
     this.cursorKeys = this.input.keyboard!.createCursorKeys();
+    this.cameras.main.fadeIn(500);
   }
 
   update(time: number) {
@@ -217,8 +218,11 @@ export class Game extends Scene {
       this.planet.disableBody();
       this.planet.setActive(false).setVisible(false);
       this.spawnDestroyedEnemy(this.planet.x, this.planet.y);
-      this.scene.start(SCENE_KEYS.GAME_OVER_SCENE, {
-        score: this.score
+      this.cameras.main.fadeOut(500,);
+      this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
+        this.scene.start(SCENE_KEYS.GAME_OVER_SCENE, {
+          score: this.score
+        });
       });
     }
   }

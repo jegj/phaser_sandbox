@@ -1,6 +1,6 @@
 import { Scene } from 'phaser';
 import { SCENE_KEYS } from '../common/scenes.keys';
-import { IMAGE_ASSETS, AUDIO_ASSETS, SPRITESHEET_ASSETS } from '../common/assets';
+import { IMAGE_ASSETS, AUDIO_ASSETS, SPRITESHEET_ASSETS, ASSET_KEYS } from '../common/assets';
 
 export class Preload extends Scene {
   constructor() {
@@ -39,7 +39,7 @@ export class Preload extends Scene {
         }
       );
     });
-
+    this.sound.play(ASSET_KEYS.BACKGROUND_MUSIC, { loop: true, volume: 0.5 });
     this.scene.start(SCENE_KEYS.GAME_SCENE);
   }
 }

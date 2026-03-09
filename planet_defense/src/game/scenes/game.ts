@@ -125,6 +125,7 @@ export class Game extends Scene {
     bullet.setActive(true).setVisible(true).setScale(1.5).play(ASSET_KEYS.BULLET).enableBody();
     bullet.setVelocity(velocity.x, velocity.y);
     bullet.setRotation(this.player.rotation);
+    this.sound.play(ASSET_KEYS.FX_SHOT, { volume: 0.1 });
     console.log('fireBUllet: number of bullet', this.bulletGroup.getLength());
   }
 
@@ -184,6 +185,7 @@ export class Game extends Scene {
     explosion.once(Phaser.Animations.Events.ANIMATION_COMPLETE, () => {
       explosion.setActive(false).setVisible(false);
     });
+    this.sound.play(ASSET_KEYS.FX_EXPLOSION, { volume: 0.4 });
   }
 
   private handlePlanetEnemyCollision(planet: Phaser.GameObjects.GameObject, enemy: Phaser.GameObjects.GameObject) {
@@ -225,5 +227,6 @@ export class Game extends Scene {
         });
       });
     }
+    this.sound.play(ASSET_KEYS.FX_HIT, { volume: 0.5 });
   }
 }

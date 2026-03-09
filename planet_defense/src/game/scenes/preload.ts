@@ -40,6 +40,6 @@ export class Preload extends Scene {
       );
     });
     this.sound.play(ASSET_KEYS.BACKGROUND_MUSIC, { loop: true, volume: 0.5 });
-    this.scene.start(SCENE_KEYS.GAME_SCENE);
+    this.scene.start(SCENE_KEYS.TITLE_SCENE);
   }
 }

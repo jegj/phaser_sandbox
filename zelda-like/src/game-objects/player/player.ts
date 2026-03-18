@@ -1,7 +1,8 @@
 import * as Phaser from "phaser";
-import { PLAYER_ANIMATION_KEYS } from "../../common/assets";
+import { PLAYER_SPEED } from "../../common/config";
 import { GameObject, Position } from "../../common/types";
 import { ControlsComponent } from "../../components/game-object/controls-component";
+import { SpeedComponent } from "../../components/game-object/speed-component";
 import { InputComponent } from "../../components/input/input-component";
 import { StateMachine } from "../../components/state-machine/state-machine";
 import { CHARACTER_STATES } from "../../components/state-machine/states/character/character-states";
@@ -18,6 +19,7 @@ export type PlayerConfig = {
 
 export class Player extends Phaser.Physics.Arcade.Sprite {
   private controlsComponent: ControlsComponent;
+  private speedComponent: SpeedComponent;
   private stateMachine: StateMachine;
 
   constructor(config: PlayerConfig) {
@@ -29,6 +31,11 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     this.controlsComponent = new ControlsComponent(
       this as unknown as GameObject,
       config.controls,
+    );
+
+    this.speedComponent = new SpeedComponent(
+      this as unknown as GameObject,
+      PLAYER_SPEED,
     );
 
     this.stateMachine = new StateMachine("player");
@@ -44,6 +51,10 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
   get controls(): InputComponent {
     return this.controlsComponent.controls;
+  }
+
+  get speed(): number {
+    return this.speedComponent.speed;
   }
 
   update(): void {

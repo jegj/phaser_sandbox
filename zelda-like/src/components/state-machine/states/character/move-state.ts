@@ -89,6 +89,6 @@ export class MoveState extends BaseCharacterState {
     if (!isArcadePhysicsBody(this._gameObject.body)) {
       return;
     }
-    this._gameObject.body.velocity.normalize().scale(80);
+    this._gameObject.body.velocity.normalize().scale(this._gameObject.speed);
   }
 }

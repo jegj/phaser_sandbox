@@ -1,6 +1,6 @@
 import * as Phaser from "phaser";
 import { PLAYER_SPEED } from "../../common/config";
-import { GameObject, Position } from "../../common/types";
+import { Direction, GameObject, Position } from "../../common/types";
 import { ControlsComponent } from "../../components/game-object/controls-component";
 import { SpeedComponent } from "../../components/game-object/speed-component";
 import { InputComponent } from "../../components/input/input-component";
@@ -8,6 +8,7 @@ import { StateMachine } from "../../components/state-machine/state-machine";
 import { CHARACTER_STATES } from "../../components/state-machine/states/character/character-states";
 import { IdleState } from "../../components/state-machine/states/character/idle-state";
 import { MoveState } from "../../components/state-machine/states/character/move-state";
+import { DirectionComponent } from "../../components/game-object/direction-component";
 
 export type PlayerConfig = {
   scene: Phaser.Scene;
@@ -20,6 +21,7 @@ export type PlayerConfig = {
 export class Player extends Phaser.Physics.Arcade.Sprite {
   private controlsComponent: ControlsComponent;
   private speedComponent: SpeedComponent;
+  private directionComponent: DirectionComponent;
   private stateMachine: StateMachine;
 
   constructor(config: PlayerConfig) {
@@ -38,6 +40,8 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       PLAYER_SPEED,
     );
 
+    this.directionComponent = new DirectionComponent(this);
+
     this.stateMachine = new StateMachine("player");
     this.stateMachine.addState(new IdleState(this));
     this.stateMachine.addState(new MoveState(this));
@@ -55,6 +59,14 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
   get speed(): number {
     return this.speedComponent.speed;
+  }
+
+  get direction(): Direction {
+    return this.directionComponent.direction;
+  }
+
+  set direction(value: Direction) {
+    this.directionComponent.direction = value;
   }
 
   update(): void {

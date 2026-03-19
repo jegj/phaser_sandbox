@@ -24,17 +24,9 @@ export class MoveState extends BaseCharacterState {
     }
 
     if (controls.isUpDown) {
-      this._gameObject.play(
-        { key: PLAYER_ANIMATION_KEYS.WALK_UP, repeat: -1 },
-        true,
-      );
       this.updateVelocity(false, -1);
       this.updateDirection(DIRECTION.UP);
     } else if (controls.isDownDown) {
-      this._gameObject.play(
-        { key: PLAYER_ANIMATION_KEYS.WALK_DOWN, repeat: -1 },
-        true,
-      );
       this.updateVelocity(false, 1);
       this.updateDirection(DIRECTION.DOWN);
     } else {
@@ -45,22 +37,14 @@ export class MoveState extends BaseCharacterState {
     if (controls.isLeftDown) {
       this._gameObject.setFlipX(true);
       this.updateVelocity(true, -1);
-      this.updateDirection(DIRECTION.LEFT);
       if (!isMovingVertically) {
-        this._gameObject.play(
-          { key: PLAYER_ANIMATION_KEYS.WALK_SIDE, repeat: -1 },
-          true,
-        );
+        this.updateDirection(DIRECTION.LEFT);
       }
     } else if (controls.isRightDown) {
       this._gameObject.setFlipX(false);
       this.updateVelocity(true, 1);
-      this.updateDirection(DIRECTION.RIGHT);
       if (!isMovingVertically) {
-        this._gameObject.play(
-          { key: PLAYER_ANIMATION_KEYS.WALK_SIDE, repeat: -1 },
-          true,
-        );
+        this.updateDirection(DIRECTION.RIGHT);
       }
     } else {
       this.updateVelocity(true, 0);
@@ -100,5 +84,6 @@ export class MoveState extends BaseCharacterState {
 
   private updateDirection(direction: Direction) {
     this._gameObject.direction = direction;
+    this._gameObject.animation.playAnimation(`WALK_${direction}`);
   }
 }

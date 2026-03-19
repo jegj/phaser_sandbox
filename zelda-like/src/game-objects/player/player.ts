@@ -9,6 +9,11 @@ import { CHARACTER_STATES } from "../../components/state-machine/states/characte
 import { IdleState } from "../../components/state-machine/states/character/idle-state";
 import { MoveState } from "../../components/state-machine/states/character/move-state";
 import { DirectionComponent } from "../../components/game-object/direction-component";
+import {
+  AnimationComponent,
+  AnimationConfig,
+} from "../../components/game-object/animation-component";
+import { PLAYER_ANIMATION_KEYS } from "../../common/assets";
 
 export type PlayerConfig = {
   scene: Phaser.Scene;
@@ -22,6 +27,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   private controlsComponent: ControlsComponent;
   private speedComponent: SpeedComponent;
   private directionComponent: DirectionComponent;
+  private animationComponent: AnimationComponent;
   private stateMachine: StateMachine;
 
   constructor(config: PlayerConfig) {
@@ -42,6 +48,53 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
     this.directionComponent = new DirectionComponent(
       this as unknown as GameObject,
+    );
+
+    const animationConfig: AnimationConfig = {
+      WALK_DOWN: {
+        key: PLAYER_ANIMATION_KEYS.WALK_DOWN,
+        repeat: -1,
+        ignoreIfPlaying: true,
+      },
+      WALK_UP: {
+        key: PLAYER_ANIMATION_KEYS.WALK_UP,
+        repeat: -1,
+        ignoreIfPlaying: true,
+      },
+      WALK_LEFT: {
+        key: PLAYER_ANIMATION_KEYS.WALK_SIDE,
+        repeat: -1,
+        ignoreIfPlaying: true,
+      },
+      WALK_RIGHT: {
+        key: PLAYER_ANIMATION_KEYS.WALK_SIDE,
+        repeat: -1,
+        ignoreIfPlaying: true,
+      },
+      IDLE_DOWN: {
+        key: PLAYER_ANIMATION_KEYS.IDLE_DOWN,
+        repeat: -1,
+        ignoreIfPlaying: true,
+      },
+      IDLE_UP: {
+        key: PLAYER_ANIMATION_KEYS.IDLE_UP,
+        repeat: -1,
+        ignoreIfPlaying: true,
+      },
+      IDLE_LEFT: {
+        key: PLAYER_ANIMATION_KEYS.IDLE_SIDE,
+        repeat: -1,
+        ignoreIfPlaying: true,
+      },
+      IDLE_RIGHT: {
+        key: PLAYER_ANIMATION_KEYS.IDLE_SIDE,
+        repeat: -1,
+        ignoreIfPlaying: true,
+      },
+    };
+    this.animationComponent = new AnimationComponent(
+      this as unknown as GameObject,
+      animationConfig,
     );
 
     this.stateMachine = new StateMachine("player");
@@ -69,6 +122,10 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
   set direction(value: Direction) {
     this.directionComponent.direction = value;
+  }
+
+  get animation(): AnimationComponent {
+    return this.animationComponent;
   }
 
   update(): void {

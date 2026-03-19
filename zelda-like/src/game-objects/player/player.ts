@@ -40,7 +40,9 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       PLAYER_SPEED,
     );
 
-    this.directionComponent = new DirectionComponent(this);
+    this.directionComponent = new DirectionComponent(
+      this as unknown as GameObject,
+    );
 
     this.stateMachine = new StateMachine("player");
     this.stateMachine.addState(new IdleState(this));

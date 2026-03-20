@@ -21,5 +21,6 @@ export class PreloadScene extends Phaser.Scene {
 
   private createAnimation() {
     this.anims.createFromAseprite(ASSET_KEYS.PLAYER);
+    this.anims.createFromAseprite(ASSET_KEYS.SPIDER);
   }
 }

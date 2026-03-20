@@ -3,6 +3,7 @@ import { ASSET_KEYS } from "../common/assets";
 import { KeyboardComponent } from "../components/input/keyboard-component";
 import { Player } from "../game-objects/player/player";
 import { SCENE_KEYS } from "./scene-keys";
+import { Spider } from "../game-objects/enemies/spider";
 
 export class GameScene extends Phaser.Scene {
   private player: Phaser.Physics.Arcade.Sprite;
@@ -29,9 +30,12 @@ export class GameScene extends Phaser.Scene {
     this.player = new Player({
       scene: this,
       position: { x: this.scale.width / 2, y: this.scale.height / 2 },
-      assetKey: ASSET_KEYS.PLAYER,
-      frame: 0,
       controls: this.controls,
+    });
+
+    new Spider({
+      scene: this,
+      position: { x: this.scale.width / 2, y: this.scale.height / 2 + 50 },
     });
   }
 }

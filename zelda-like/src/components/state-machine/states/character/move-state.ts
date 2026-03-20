@@ -1,4 +1,3 @@
-import { PLAYER_ANIMATION_KEYS } from "../../../../common/assets";
 import { DIRECTION } from "../../../../common/common";
 import { Direction } from "../../../../common/types";
 import { isArcadePhysicsBody } from "../../../../common/utils";

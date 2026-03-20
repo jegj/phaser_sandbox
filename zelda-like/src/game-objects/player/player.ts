@@ -1,19 +1,19 @@
 import * as Phaser from "phaser";
+import { PLAYER_ANIMATION_KEYS } from "../../common/assets";
 import { PLAYER_SPEED } from "../../common/config";
 import { Direction, GameObject, Position } from "../../common/types";
+import {
+  AnimationComponent,
+  AnimationConfig,
+} from "../../components/game-object/animation-component";
 import { ControlsComponent } from "../../components/game-object/controls-component";
+import { DirectionComponent } from "../../components/game-object/direction-component";
 import { SpeedComponent } from "../../components/game-object/speed-component";
 import { InputComponent } from "../../components/input/input-component";
 import { StateMachine } from "../../components/state-machine/state-machine";
 import { CHARACTER_STATES } from "../../components/state-machine/states/character/character-states";
 import { IdleState } from "../../components/state-machine/states/character/idle-state";
 import { MoveState } from "../../components/state-machine/states/character/move-state";
-import { DirectionComponent } from "../../components/game-object/direction-component";
-import {
-  AnimationComponent,
-  AnimationConfig,
-} from "../../components/game-object/animation-component";
-import { PLAYER_ANIMATION_KEYS } from "../../common/assets";
 
 export type PlayerConfig = {
   scene: Phaser.Scene;

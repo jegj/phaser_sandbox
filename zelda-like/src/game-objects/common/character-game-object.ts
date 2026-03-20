@@ -9,9 +9,6 @@ import { DirectionComponent } from "../../components/game-object/direction-compo
 import { SpeedComponent } from "../../components/game-object/speed-component";
 import { InputComponent } from "../../components/input/input-component";
 import { StateMachine } from "../../components/state-machine/state-machine";
-import { CHARACTER_STATES } from "../../components/state-machine/states/character/character-states";
-import { IdleState } from "../../components/state-machine/states/character/idle-state";
-import { MoveState } from "../../components/state-machine/states/character/move-state";
 
 export type CharacterConfig = {
   scene: Phaser.Scene;

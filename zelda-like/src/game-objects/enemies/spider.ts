@@ -1,6 +1,6 @@
 import * as Phaser from "phaser";
 import { ASSET_KEYS, SPIDER_ANIMATION_KEYS } from "../../common/assets";
-import { ENEMY_SPIDER_SPEED, PLAYER_SPEED } from "../../common/config";
+import { ENEMY_SPIDER_SPEED } from "../../common/config";
 import { Position } from "../../common/types";
 import { AnimationConfig } from "../../components/game-object/animation-component";
 import { InputComponent } from "../../components/input/input-component";

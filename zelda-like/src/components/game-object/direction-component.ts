@@ -4,12 +4,12 @@ import { BaseGameObjectComponent } from "./base-game-object-component";
 
 export class DirectionComponent extends BaseGameObjectComponent {
   private _direction: Direction;
-  private callback: (direction: Direction) => void;
+  private _callback: (direction: Direction) => void;
 
   constructor(gameObject: GameObject, onDirectionCallback = () => undefined) {
     super(gameObject);
     this._direction = DIRECTION.DOWN;
-    this.callback = onDirectionCallback;
+    this._callback = onDirectionCallback;
   }
 
   get direction(): Direction {
@@ -18,6 +18,10 @@ export class DirectionComponent extends BaseGameObjectComponent {
 
   set direction(direction: Direction) {
     this._direction = direction;
-    this.callback(this._direction);
+    this._callback(this._direction);
+  }
+
+  set callback(callback: (direction: Direction) => void) {
+    this._callback = callback;
   }
 }

@@ -6,7 +6,8 @@ import { SCENE_KEYS } from "./scene-keys";
 import { Spider } from "../game-objects/enemies/spider";
 
 export class GameScene extends Phaser.Scene {
-  private player: Phaser.Physics.Arcade.Sprite;
+  private player: Player;
+  private spider: Spider;
   private controls: KeyboardComponent;
   constructor() {
     super({
@@ -33,9 +34,14 @@ export class GameScene extends Phaser.Scene {
       controls: this.controls,
     });
 
-    new Spider({
+    this.spider = new Spider({
       scene: this,
       position: { x: this.scale.width / 2, y: this.scale.height / 2 + 50 },
     });
+    this.spider.setCollideWorldBounds(true);
+  }
+
+  public update() {
+    this.spider.update();
   }
 }

@@ -1,6 +1,9 @@
 import * as Phaser from "phaser";
 import { ASSET_KEYS, PLAYER_ANIMATION_KEYS } from "../../common/assets";
-import { PLAYER_SPEED } from "../../common/config";
+import {
+  PLAYER_INVULNERABLE_AFTER_HIT_DURATION,
+  PLAYER_SPEED,
+} from "../../common/config";
 import { Position } from "../../common/types";
 import { AnimationConfig } from "../../components/game-object/animation-component";
 import { InputComponent } from "../../components/input/input-component";
@@ -70,6 +73,9 @@ export class Player extends CharacterGameObject {
       animationConfig,
       speed: PLAYER_SPEED,
       inputComponent: config.controls,
+      isInvulnerable: false,
+      invulnerableAfterHitAnimationDuration:
+        PLAYER_INVULNERABLE_AFTER_HIT_DURATION,
     });
 
     this.stateMachine.addState(new IdleState(this));

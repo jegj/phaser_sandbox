@@ -6,10 +6,10 @@ import {
 } from "../../components/game-object/animation-component";
 import { ControlsComponent } from "../../components/game-object/controls-component";
 import { DirectionComponent } from "../../components/game-object/direction-component";
+import { InvulnerableComponent } from "../../components/game-object/invulnerable-component";
 import { SpeedComponent } from "../../components/game-object/speed-component";
 import { InputComponent } from "../../components/input/input-component";
 import { StateMachine } from "../../components/state-machine/state-machine";
-
 export type CharacterConfig = {
   scene: Phaser.Scene;
   position: Position;
@@ -20,6 +20,8 @@ export type CharacterConfig = {
   speed: number;
   id?: string;
   isPlayer: boolean;
+  isInvulnerable?: boolean;
+  invulnerableAfterHitAnimationDuration?: number;
 };
 
 export abstract class CharacterGameObject extends Phaser.Physics.Arcade.Sprite {
@@ -27,11 +29,21 @@ export abstract class CharacterGameObject extends Phaser.Physics.Arcade.Sprite {
   protected speedComponent: SpeedComponent;
   protected directionComponent: DirectionComponent;
   protected animationComponent: AnimationComponent;
+  protected invulnerableComponent: InvulnerableComponent;
   protected stateMachine: StateMachine;
   protected isPlayer: boolean;
 
   constructor(config: CharacterConfig) {
-    const { scene, position, assetKey, frame, id, isPlayer } = config;
+    const {
+      scene,
+      position,
+      assetKey,
+      frame,
+      id,
+      isPlayer,
+      isInvulnerable,
+      invulnerableAfterHitAnimationDuration,
+    } = config;
     const { x, y } = position;
     super(scene, x, y, assetKey, frame || 0);
     scene.add.existing(this);
@@ -52,6 +64,11 @@ export abstract class CharacterGameObject extends Phaser.Physics.Arcade.Sprite {
     this.animationComponent = new AnimationComponent(
       this as unknown as GameObject,
       config.animationConfig,
+    );
+    this.invulnerableComponent = new InvulnerableComponent(
+      this as unknown as GameObject,
+      isInvulnerable ?? false,
+      invulnerableAfterHitAnimationDuration,
     );
 
     this.stateMachine = new StateMachine(id);

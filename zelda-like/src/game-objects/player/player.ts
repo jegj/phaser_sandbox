@@ -1,6 +1,7 @@
 import * as Phaser from "phaser";
 import { ASSET_KEYS, PLAYER_ANIMATION_KEYS } from "../../common/assets";
 import {
+  PLAYER_HURT_PUSH_BACK_SPEED,
   PLAYER_INVULNERABLE_AFTER_HIT_DURATION,
   PLAYER_SPEED,
 } from "../../common/config";
@@ -11,6 +12,8 @@ import { CHARACTER_STATES } from "../../components/state-machine/states/characte
 import { IdleState } from "../../components/state-machine/states/character/idle-state";
 import { MoveState } from "../../components/state-machine/states/character/move-state";
 import { CharacterGameObject } from "../common/character-game-object";
+import { HurtState } from "../../components/state-machine/states/character/hurt.state";
+import { flash } from "../../common/juice-utils";
 
 export type PlayerConfig = {
   scene: Phaser.Scene;
@@ -59,6 +62,26 @@ const animationConfig: AnimationConfig = {
     repeat: -1,
     ignoreIfPlaying: true,
   },
+  HURT_DOWN: {
+    key: PLAYER_ANIMATION_KEYS.HURT_DOWN,
+    repeat: 0,
+    ignoreIfPlaying: true,
+  },
+  HURT_UP: {
+    key: PLAYER_ANIMATION_KEYS.HURT_UP,
+    repeat: 0,
+    ignoreIfPlaying: true,
+  },
+  HURT_LEFT: {
+    key: PLAYER_ANIMATION_KEYS.HURT_SIDE,
+    repeat: 0,
+    ignoreIfPlaying: true,
+  },
+  HURT_RIGHT: {
+    key: PLAYER_ANIMATION_KEYS.HURT_SIDE,
+    repeat: 0,
+    ignoreIfPlaying: true,
+  },
 };
 
 export class Player extends CharacterGameObject {
@@ -80,6 +103,11 @@ export class Player extends CharacterGameObject {
 
     this.stateMachine.addState(new IdleState(this));
     this.stateMachine.addState(new MoveState(this));
+    this.stateMachine.addState(
+      new HurtState(this, PLAYER_HURT_PUSH_BACK_SPEED, () => {
+        flash(this);
+      }),
+    );
     this.stateMachine.setState(CHARACTER_STATES.IDLE_STATE);
 
     config.scene.events.on(Phaser.Scenes.Events.UPDATE, this.update, this);
@@ -90,9 +118,5 @@ export class Player extends CharacterGameObject {
     this.physicsBody
       .setSize(12, 16, true)
       .setOffset(this.width / 2 - 5, this.height / 2);
-  }
-
-  get physicsBody(): Phaser.Physics.Arcade.Body {
-    return this.body as Phaser.Physics.Arcade.Body;
   }
 }

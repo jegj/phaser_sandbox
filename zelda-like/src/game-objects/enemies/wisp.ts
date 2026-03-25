@@ -56,5 +56,6 @@ export class Wisp extends CharacterGameObject {
       repeat: -1,
       duration: ENEMY_WISP_PULSE_ANIMATION_DURATION,
     });
+    this.physicsBody.setSize(12, 14, true);
   }
 }

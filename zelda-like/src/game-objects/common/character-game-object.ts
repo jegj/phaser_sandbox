@@ -10,6 +10,8 @@ import { InvulnerableComponent } from "../../components/game-object/invulnerable
 import { SpeedComponent } from "../../components/game-object/speed-component";
 import { InputComponent } from "../../components/input/input-component";
 import { StateMachine } from "../../components/state-machine/state-machine";
+import { CHARACTER_ANIMATIONS } from "../../common/assets";
+import { CHARACTER_STATES } from "../../components/state-machine/states/character/character-states";
 export type CharacterConfig = {
   scene: Phaser.Scene;
   position: Position;
@@ -99,7 +101,23 @@ export abstract class CharacterGameObject extends Phaser.Physics.Arcade.Sprite {
     return !this.isPlayer;
   }
 
+  get invulnerableCmp(): InvulnerableComponent {
+    return this.invulnerableComponent;
+  }
+
   update(): void {
     this.stateMachine.onUpdate();
+  }
+
+  public hit(direction: Direction): void {
+    if (this.invulnerableComponent.invulnerable) {
+      return;
+    }
+
+    this.stateMachine.setState(CHARACTER_STATES.HURT_STATE, direction);
+  }
+
+  get physicsBody(): Phaser.Physics.Arcade.Body {
+    return this.body as Phaser.Physics.Arcade.Body;
   }
 }

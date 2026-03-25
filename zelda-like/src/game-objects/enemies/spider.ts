@@ -1,6 +1,7 @@
 import * as Phaser from "phaser";
 import { ASSET_KEYS, SPIDER_ANIMATION_KEYS } from "../../common/assets";
 import {
+  ENEMY_HURT_PUSH_BACK_SPEED,
   ENEMY_SPIDER_CHANGE_DIRECTION_DELAY_MAX,
   ENEMY_SPIDER_CHANGE_DIRECTION_DELAY_MIN,
   ENEMY_SPIDER_CHANGE_DIRECTION_DELAY_WAIT,
@@ -16,6 +17,7 @@ import { MoveState } from "../../components/state-machine/states/character/move-
 import { CharacterGameObject } from "../common/character-game-object";
 import { DIRECTION } from "../../common/common";
 import { exhaustiveGuard } from "../../common/utils";
+import { HurtState } from "../../components/state-machine/states/character/hurt.state";
 export type SpiderConfig = {
   scene: Phaser.Scene;
   position: Position;
@@ -24,6 +26,11 @@ export type SpiderConfig = {
 const animConfig = {
   key: SPIDER_ANIMATION_KEYS.WALK,
   repeat: -1,
+  ignoreIfPlaying: true,
+};
+const hurtAnimConfig = {
+  key: SPIDER_ANIMATION_KEYS.HIT,
+  repeat: 0,
   ignoreIfPlaying: true,
 };
 const animationConfig: AnimationConfig = {
@@ -35,6 +42,10 @@ const animationConfig: AnimationConfig = {
   IDLE_UP: animConfig,
   IDLE_LEFT: animConfig,
   IDLE_RIGHT: animConfig,
+  HURT_DOWN: hurtAnimConfig,
+  HURT_UP: hurtAnimConfig,
+  HURT_LEFT: hurtAnimConfig,
+  HURT_RIGHT: hurtAnimConfig,
 };
 
 export class Spider extends CharacterGameObject {
@@ -57,6 +68,7 @@ export class Spider extends CharacterGameObject {
     };
     this.stateMachine.addState(new IdleState(this));
     this.stateMachine.addState(new MoveState(this));
+    this.stateMachine.addState(new HurtState(this, ENEMY_HURT_PUSH_BACK_SPEED));
 
     this.stateMachine.setState(CHARACTER_STATES.IDLE_STATE);
 
@@ -66,6 +78,7 @@ export class Spider extends CharacterGameObject {
       callbackScope: this,
       loop: false,
     });
+    this.physicsBody.setSize(12, 14, true);
   }
 
   private handleDirectionChange(direction: Direction) {

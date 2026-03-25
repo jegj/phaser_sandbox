@@ -6,6 +6,7 @@ import { Wisp } from "../game-objects/enemies/wisp";
 import { Player } from "../game-objects/player/player";
 import { SCENE_KEYS } from "./scene-keys";
 import { CharacterGameObject } from "../game-objects/common/character-game-object";
+import { DIRECTION } from "../common/common";
 
 export class GameScene extends Phaser.Scene {
   private player: Player;
@@ -62,6 +63,9 @@ export class GameScene extends Phaser.Scene {
 
     this.physics.add.overlap(this.player, this.enemyGroup, (player, enemy) => {
       console.log("hit");
+      this.player.hit(DIRECTION.DOWN);
+      const enemyGameObject = enemy as CharacterGameObject;
+      enemyGameObject.hit(this.player.direction);
     });
   }
 }

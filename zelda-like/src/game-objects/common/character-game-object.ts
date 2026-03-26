@@ -10,8 +10,8 @@ import { InvulnerableComponent } from "../../components/game-object/invulnerable
 import { SpeedComponent } from "../../components/game-object/speed-component";
 import { InputComponent } from "../../components/input/input-component";
 import { StateMachine } from "../../components/state-machine/state-machine";
-import { CHARACTER_ANIMATIONS } from "../../common/assets";
 import { CHARACTER_STATES } from "../../components/state-machine/states/character/character-states";
+import { LifeComponent } from "../../components/game-object/life-component";
 export type CharacterConfig = {
   scene: Phaser.Scene;
   position: Position;
@@ -24,6 +24,8 @@ export type CharacterConfig = {
   isPlayer: boolean;
   isInvulnerable?: boolean;
   invulnerableAfterHitAnimationDuration?: number;
+  maxLife: number;
+  currentLife?: number;
 };
 
 export abstract class CharacterGameObject extends Phaser.Physics.Arcade.Sprite {
@@ -32,8 +34,10 @@ export abstract class CharacterGameObject extends Phaser.Physics.Arcade.Sprite {
   protected directionComponent: DirectionComponent;
   protected animationComponent: AnimationComponent;
   protected invulnerableComponent: InvulnerableComponent;
+  protected lifeComponent: LifeComponent;
   protected stateMachine: StateMachine;
   protected isPlayer: boolean;
+  protected _isDefeated: boolean;
 
   constructor(config: CharacterConfig) {
     const {
@@ -45,6 +49,8 @@ export abstract class CharacterGameObject extends Phaser.Physics.Arcade.Sprite {
       isPlayer,
       isInvulnerable,
       invulnerableAfterHitAnimationDuration,
+      maxLife,
+      currentLife,
     } = config;
     const { x, y } = position;
     super(scene, x, y, assetKey, frame || 0);
@@ -72,9 +78,18 @@ export abstract class CharacterGameObject extends Phaser.Physics.Arcade.Sprite {
       isInvulnerable ?? false,
       invulnerableAfterHitAnimationDuration,
     );
+    this.lifeComponent = new LifeComponent(
+      this as unknown as GameObject,
+      maxLife,
+      currentLife ?? 0,
+    );
 
     this.stateMachine = new StateMachine(id);
     this.isPlayer = isPlayer;
+  }
+
+  get isDefeated() {
+    return this._isDefeated;
   }
 
   get controls(): InputComponent {
@@ -109,12 +124,41 @@ export abstract class CharacterGameObject extends Phaser.Physics.Arcade.Sprite {
     this.stateMachine.onUpdate();
   }
 
-  public hit(direction: Direction): void {
+  public hit(direction: Direction, damage: number): void {
+    if (this.isDefeated) {
+      return;
+    }
+
     if (this.invulnerableComponent.invulnerable) {
       return;
     }
 
+    this.lifeComponent.takeDamage(damage);
+
+    if (this.lifeComponent.life == 0) {
+      this._isDefeated = true;
+      this.stateMachine.setState(CHARACTER_STATES.DEATH_STATE, direction);
+      return;
+    }
+
     this.stateMachine.setState(CHARACTER_STATES.HURT_STATE, direction);
+  }
+
+  public disableObject() {
+    (this.body as Phaser.Physics.Arcade.Body).enable = false;
+    this.active = false;
+    if (!this.isPlayer) {
+      this.visible = false;
+    }
+  }
+
+  public enableObject() {
+    if (this.isDefeated) {
+      return;
+    }
+    (this.body as Phaser.Physics.Arcade.Body).enable = true;
+    this.visible = true;
+    this.active = true;
   }
 
   get physicsBody(): Phaser.Physics.Arcade.Body {

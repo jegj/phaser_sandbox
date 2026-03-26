@@ -5,20 +5,23 @@ import {
   PLAYER_INVULNERABLE_AFTER_HIT_DURATION,
   PLAYER_SPEED,
 } from "../../common/config";
+import { flash } from "../../common/juice-utils";
 import { Position } from "../../common/types";
 import { AnimationConfig } from "../../components/game-object/animation-component";
 import { InputComponent } from "../../components/input/input-component";
 import { CHARACTER_STATES } from "../../components/state-machine/states/character/character-states";
+import { DeathState } from "../../components/state-machine/states/character/death-state";
+import { HurtState } from "../../components/state-machine/states/character/hurt.state";
 import { IdleState } from "../../components/state-machine/states/character/idle-state";
 import { MoveState } from "../../components/state-machine/states/character/move-state";
 import { CharacterGameObject } from "../common/character-game-object";
-import { HurtState } from "../../components/state-machine/states/character/hurt.state";
-import { flash } from "../../common/juice-utils";
 
 export type PlayerConfig = {
   scene: Phaser.Scene;
   position: Position;
   controls: InputComponent;
+  maxLife: number;
+  currentLife: number;
 };
 
 const animationConfig: AnimationConfig = {
@@ -82,6 +85,26 @@ const animationConfig: AnimationConfig = {
     repeat: 0,
     ignoreIfPlaying: true,
   },
+  DIE_DOWN: {
+    key: PLAYER_ANIMATION_KEYS.DIE_DOWN,
+    repeat: 0,
+    ignoreIfPlaying: true,
+  },
+  DIE_UP: {
+    key: PLAYER_ANIMATION_KEYS.DIE_UP,
+    repeat: 0,
+    ignoreIfPlaying: true,
+  },
+  DIE_LEFT: {
+    key: PLAYER_ANIMATION_KEYS.DIE_SIDE,
+    repeat: 0,
+    ignoreIfPlaying: true,
+  },
+  DIE_RIGHT: {
+    key: PLAYER_ANIMATION_KEYS.DIE_SIDE,
+    repeat: 0,
+    ignoreIfPlaying: true,
+  },
 };
 
 export class Player extends CharacterGameObject {
@@ -99,6 +122,8 @@ export class Player extends CharacterGameObject {
       isInvulnerable: false,
       invulnerableAfterHitAnimationDuration:
         PLAYER_INVULNERABLE_AFTER_HIT_DURATION,
+      maxLife: config.maxLife,
+      currentLife: config.currentLife,
     });
 
     this.stateMachine.addState(new IdleState(this));
@@ -108,6 +133,7 @@ export class Player extends CharacterGameObject {
         flash(this);
       }),
     );
+    this.stateMachine.addState(new DeathState(this));
     this.stateMachine.setState(CHARACTER_STATES.IDLE_STATE);
 
     config.scene.events.on(Phaser.Scenes.Events.UPDATE, this.update, this);

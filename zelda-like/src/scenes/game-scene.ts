@@ -1,18 +1,21 @@
 import * as Phaser from "phaser";
 import { ASSET_KEYS } from "../common/assets";
-import { KeyboardComponent } from "../components/input/keyboard-component";
-import { Spider } from "../game-objects/enemies/spider";
-import { Wisp } from "../game-objects/enemies/wisp";
-import { Player } from "../game-objects/player/player";
-import { SCENE_KEYS } from "./scene-keys";
-import { CharacterGameObject } from "../game-objects/common/character-game-object";
 import { DIRECTION } from "../common/common";
 import { PLAYER_START_MAX_HEALTH } from "../common/config";
+import { KeyboardComponent } from "../components/input/keyboard-component";
+import { CharacterGameObject } from "../game-objects/common/character-game-object";
+import { Spider } from "../game-objects/enemies/spider";
+import { Wisp } from "../game-objects/enemies/wisp";
+import { Chest } from "../game-objects/objects/chest";
+import { Pot } from "../game-objects/objects/pot";
+import { Player } from "../game-objects/player/player";
+import { SCENE_KEYS } from "./scene-keys";
 
 export class GameScene extends Phaser.Scene {
   private player: Player;
   private controls: KeyboardComponent;
   private enemyGroup: Phaser.GameObjects.Group;
+  private _blockingGroup: Phaser.GameObjects.Group;
   constructor() {
     super({
       key: SCENE_KEYS.GAME_SCENE,
@@ -55,6 +58,27 @@ export class GameScene extends Phaser.Scene {
         runChildUpdate: true,
       },
     );
+
+    this._blockingGroup = this.add.group([
+      new Pot({
+        scene: this,
+        position: { x: this.scale.width / 2 + 90, y: this.scale.height / 2 },
+      }),
+
+      new Chest({
+        scene: this,
+        position: { x: this.scale.width / 2 - 90, y: this.scale.height / 2 },
+        requireBossKey: false,
+      }),
+      new Chest({
+        scene: this,
+        position: {
+          x: this.scale.width / 2 - 90,
+          y: this.scale.height / 2 - 80,
+        },
+        requireBossKey: true,
+      }),
+    ]);
     this.registerColliders();
   }
 
@@ -70,5 +94,15 @@ export class GameScene extends Phaser.Scene {
       const enemyGameObject = enemy as CharacterGameObject;
       enemyGameObject.hit(this.player.direction, 1);
     });
+    this.physics.add.collider(
+      this.player,
+      this._blockingGroup,
+      (player, blockObject) => {},
+    );
+    this.physics.add.collider(
+      this.enemyGroup,
+      this._blockingGroup,
+      (player, blockObject) => {},
+    );
   }
 }

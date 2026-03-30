@@ -10,6 +10,7 @@ import { Chest } from "../game-objects/objects/chest";
 import { Pot } from "../game-objects/objects/pot";
 import { Player } from "../game-objects/player/player";
 import { SCENE_KEYS } from "./scene-keys";
+import { GameObject } from "../common/types";
 
 export class GameScene extends Phaser.Scene {
   private player: Player;
@@ -97,7 +98,9 @@ export class GameScene extends Phaser.Scene {
     this.physics.add.collider(
       this.player,
       this._blockingGroup,
-      (player, blockObject) => {},
+      (player, gameObject) => {
+        this.player.collideWithGameObject(gameObject as GameObject);
+      },
     );
     this.physics.add.collider(
       this.enemyGroup,

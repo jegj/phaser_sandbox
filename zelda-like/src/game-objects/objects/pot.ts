@@ -1,6 +1,8 @@
 import Phaser from "phaser";
 import { ASSET_KEYS } from "../../common/assets";
-import { Position } from "../../common/types";
+import { INTERACTIVE_OBJECT_TYPE } from "../../common/common";
+import { GameObject, Position } from "../../common/types";
+import { InteractiveObjectsComponent } from "../../components/game-object/interactive-object-component";
 
 type PotConfig = {
   scene: Phaser.Scene;
@@ -20,5 +22,10 @@ export class Pot extends Phaser.Physics.Arcade.Sprite {
       x: position.x,
       y: position.y,
     };
+
+    new InteractiveObjectsComponent(
+      this as unknown as GameObject,
+      INTERACTIVE_OBJECT_TYPE.PICKUP,
+    );
   }
 }

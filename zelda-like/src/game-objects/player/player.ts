@@ -6,7 +6,7 @@ import {
   PLAYER_SPEED,
 } from "../../common/config";
 import { flash } from "../../common/juice-utils";
-import { Position } from "../../common/types";
+import { GameObject, Position } from "../../common/types";
 import { AnimationConfig } from "../../components/game-object/animation-component";
 import { InputComponent } from "../../components/input/input-component";
 import { CHARACTER_STATES } from "../../components/state-machine/states/character/character-states";
@@ -15,6 +15,7 @@ import { HurtState } from "../../components/state-machine/states/character/hurt.
 import { IdleState } from "../../components/state-machine/states/character/idle-state";
 import { MoveState } from "../../components/state-machine/states/character/move-state";
 import { CharacterGameObject } from "../common/character-game-object";
+import { CollidingObjectsComponent } from "../../components/game-object/colliding-object-component";
 
 export type PlayerConfig = {
   scene: Phaser.Scene;
@@ -108,6 +109,7 @@ const animationConfig: AnimationConfig = {
 };
 
 export class Player extends CharacterGameObject {
+  private _collidingObjectComponent: CollidingObjectsComponent;
   constructor(config: PlayerConfig) {
     super({
       scene: config.scene,
@@ -126,6 +128,9 @@ export class Player extends CharacterGameObject {
       currentLife: config.currentLife,
     });
 
+    this._collidingObjectComponent = new CollidingObjectsComponent(
+      this as unknown as GameObject,
+    );
     this.stateMachine.addState(new IdleState(this));
     this.stateMachine.addState(new MoveState(this));
     this.stateMachine.addState(
@@ -144,5 +149,15 @@ export class Player extends CharacterGameObject {
     this.physicsBody
       .setSize(12, 16, true)
       .setOffset(this.width / 2 - 5, this.height / 2);
+  }
+
+  public collideWithGameObject(gameObject: GameObject): void {
+    this._collidingObjectComponent.add(gameObject);
+  }
+
+  public update() {
+    super.update();
+    console.log(this._collidingObjectComponent.objects);
+    this._collidingObjectComponent.reset();
   }
 }
